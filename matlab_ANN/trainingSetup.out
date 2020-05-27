@@ -1,0 +1,143 @@
+layers:8 2 1
+layerTypes:logsig logsig purelin
+trainFunction:newff
+lowScale: 0.10
+highScale: 0.90
+percentCal: 0.80
+percentVal: 0.20
+
+
+Input Data Range:
+
+                      SAC: min=    5567.41, max=  224482.32
+
+                      Exp: min=     797.75, max=   13313.94
+
+                      SJR: min=     460.30, max=   59636.80
+
+                     DICU: min=   -8427.30, max=    4746.18
+
+                     Vern: min=     142.07, max=    1195.71
+
+                  SF_Tide: min=       3.14, max=       9.15
+
+                      DXC: min=       0.00, max=       1.00
+
+
+Input Scaling factors:
+
+                      SAC: a=0.00000365; b=  0.07965452;
+
+                      Exp: a=0.00006392; b=  0.04900990;
+
+                      SJR: a=0.00001352; b=  0.09377727;
+
+                     DICU: a=0.00006073; b=  0.61177364;
+
+                     Vern: a=0.00075927; b= -0.00787309;
+
+                  SF_Tide: a=0.13309598; b= -0.31825414;
+
+                      DXC: a=0.80000000; b=  0.10000000;
+
+
+Input Data Range:
+
+                      SAC: min=    5496.91, max=  241216.92
+
+                      Exp: min=     795.45, max=   14585.22
+
+                      SJR: min=    -182.10, max=   52804.62
+
+                     DICU: min=   -7686.98, max=    3447.80
+
+                     Vern: min=     101.33, max=     968.19
+
+                  SF_Tide: min=       3.14, max=       9.15
+
+                      DXC: min=       0.00, max=       1.00
+
+
+Input Scaling factors:
+
+                      SAC: a=0.00000339; b=  0.08134428;
+
+                      Exp: a=0.00005801; b=  0.05385258;
+
+                      SJR: a=0.00001510; b=  0.10274940;
+
+                     DICU: a=0.00007185; b=  0.65228611;
+
+                     Vern: a=0.00092287; b=  0.00648767;
+
+                  SF_Tide: a=0.13309598; b= -0.31825414;
+
+                      DXC: a=0.80000000; b=  0.10000000;
+
+
+Input Data Range:
+
+                      SAC: min=    5567.41, max=  224482.32
+
+                      Exp: min=     797.75, max=   13313.94
+
+                      SJR: min=     460.30, max=   59636.80
+
+                     DICU: min=   -8427.30, max=    4746.18
+
+                     Vern: min=     142.07, max=    1195.71
+
+                  SF_Tide: min=       3.14, max=       9.15
+
+                      DXC: min=       0.00, max=       1.00
+
+
+Input Scaling factors:
+
+                      SAC: a=0.00000365; b=  0.07965452;
+
+                      Exp: a=0.00006392; b=  0.04900990;
+
+                      SJR: a=0.00001352; b=  0.09377727;
+
+                     DICU: a=0.00006073; b=  0.61177364;
+
+                     Vern: a=0.00075927; b= -0.00787309;
+
+                  SF_Tide: a=0.13309598; b= -0.31825414;
+
+                      DXC: a=0.80000000; b=  0.10000000;
+
+
+Input Data Range:
+
+                      SAC: min=    5496.91, max=  241216.92
+
+                      Exp: min=     795.45, max=   14585.22
+
+                      SJR: min=    -182.10, max=   52804.62
+
+                     DICU: min=   -7686.98, max=    3447.80
+
+                     Vern: min=     101.33, max=     968.19
+
+                  SF_Tide: min=       3.14, max=       9.15
+
+                      DXC: min=       0.00, max=       1.00
+
+
+Input Scaling factors:
+
+                      SAC: a=0.00000339; b=  0.08134428;
+
+                      Exp: a=0.00005801; b=  0.05385258;
+
+                      SJR: a=0.00001510; b=  0.10274940;
+
+                     DICU: a=0.00007185; b=  0.65228611;
+
+                     Vern: a=0.00092287; b=  0.00648767;
+
+                  SF_Tide: a=0.13309598; b= -0.31825414;
+
+                      DXC: a=0.80000000; b=  0.10000000;
