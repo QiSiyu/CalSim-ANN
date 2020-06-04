@@ -21,7 +21,7 @@ To train the ANN with your own data, you have to prepare your own dataset that s
 * MATLAB Deep Learning Toolbox
 
 ### Introduction
-The MATLAB scripts can read data from xlsx files, normalize data and train ANNs. Please refer to matlab_tutorial.pdf in this repository for more detailed instruction.
+The MATLAB scripts can read data from xlsx files, normalize data and train ANNs.
 
 There are two different ANN architectures:
 
@@ -35,7 +35,7 @@ Results will be written into the folder: network/$ANNsetting$/$station$, where $
 
 
 ### Usage
-For detailed instruction, please refer to "matlab_manual.pdf".
+For more detailed instruction, please refer to "matlab_tutorial.pdf".
 
 To train ANNs on the given dataset, simply do the following:
   1. Open "trainANNs_single_output.m" (or "trainANN_multi_output.m" for an integrated ANN).
