@@ -46,7 +46,7 @@ input_var = {'SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC'};
 % DATA_DIR = '/Users/siyuqi/Downloads';
 DATA_DIR = '/Users/siyuqi/Documents/PhD/3_DSM2/Data_Code';
 % DATA_DIR = 'D:/ANN/MATLAB/Data';
-FILE_NAME = "ANN_data.xlsx";
+FILE_NAME = 'ANN_data.xlsx';
 
 % 4. Define name of folder you want to save your ANN
 ANNsetting ='multi_output_ANN-0.1-0.9-8-2-1-80%-MEM-7-10-11'; % folder to put results in
