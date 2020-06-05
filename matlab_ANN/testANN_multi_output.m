@@ -23,10 +23,10 @@ global ANNsetting
 % 'Antioch', 'Mallard', 'LosVaqueros', 'Martinez', 'MiddleRiver', 'Vict
 % Intake', 'CVP Intake', 'CCFB_OldR'
 predict_stations = {'Emmaton','Jersey Point',...
-                       'Collinsville', 'Rock Slough',...
-                       'Antioch','Mallard','LosVaqueros',...
-                       'Martinez','MiddleRiver','Vict Intake',...
-                       'CVP Intake','CCFB_OldR'};
+                       'Collinsville', 'Rock Slough'};%,...
+%                        'Antioch','Mallard','LosVaqueros',...
+%                        'Martinez','MiddleRiver','Vict Intake',...
+%                        'CVP Intake','CCFB_OldR'};
                    
 available_inputs = {'SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC'}; % do not change
 % 2. Define variables to be used for prediction:
@@ -35,9 +35,9 @@ input_var = {'SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC'};
 
 % 3. Define directory to the input and output excel file
 % Note: no blank space is allowed in DATA_DIR or FILE_NAME
-DATA_DIR = '/Users/siyuqi/Downloads';
+DATA_DIR = '/Users/siyuqi/Documents/GitHub/CalSim-ANN/';
 % DATA_DIR = 'D:/ANN/MATLAB/Data';
-FILE_NAME = 'ANN_data2.xlsx';
+FILE_NAME = 'ANN_data.xlsx';
 
 % 4. Define ANNsetting (the folder where the model is saved). Must be same
 % as training:
@@ -71,7 +71,7 @@ addpath('utils')
 predict_stations=sort(predict_stations);
 
 %% load network and predict
-% [input_ori, output_ori,predict_stations] = load_data(input_var,false,fullfile(DATA_DIR,FILE_NAME),predict_stations);
+[input_ori, output_ori,predict_stations] = load_data(input_var,false,fullfile(DATA_DIR,FILE_NAME),predict_stations);
 abbrev_stations_name = predict_stations;
 
 key_set = {'rock slough','rockslough','old river @ rock slough',...

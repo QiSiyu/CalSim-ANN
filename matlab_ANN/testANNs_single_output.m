@@ -33,9 +33,9 @@ input_var = {'SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC'};
 
 % 3. Define directory to the input and output excel file
 % Note: no blank space is allowed in DATA_DIR or FILE_NAME
-DATA_DIR = '/Users/siyuqi/Downloads/';
+DATA_DIR = '/Users/siyuqi/Documents/GitHub/CalSim-ANN/';
 % DATA_DIR = 'D:/ANN/MATLAB/Data';
-FILE_NAME = 'ANN_data2.xlsx';
+FILE_NAME = 'ANN_data.xlsx';
 
 % 4. Define ANNsetting (the folder where the model is saved). Must be same
 % as training:
@@ -62,7 +62,8 @@ test_size = inf;
 %% define normalization parameters and add path
 lowScale = 0.1;
 highScale = 0.9;
-
+% 6/5 siyu added
+test_mode = false;
 addpath('utils')
 
 predict_stations=sort(predict_stations);
