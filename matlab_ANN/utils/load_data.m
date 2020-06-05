@@ -112,7 +112,7 @@ for ii = 1:length(input_text)
     input_vars_index(ii)=contains(input_text(ii),input_vars,'IgnoreCase',true);
 end
 
-save('for_test.mat','input_vars_index','input_text','output_text','stations_to_predict')
+% save('for_test.mat','input_vars_index','input_text','output_text','stations_to_predict')
 
 input_ori(input_vars_index==0,:)=[];
 
