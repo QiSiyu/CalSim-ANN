@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 import pandas as pd
 import time
-
+import os
 def read_data(xl_path,input_var,output_stations):
     start = time.time()
     xls = pd.ExcelFile(xl_path)
@@ -82,8 +82,8 @@ def read_data(xl_path,input_var,output_stations):
 
     return [x_data,y_data]
     
-def writeF90(name,slope,bias,w1=None,b1=None,w2=None,b2=None,w3=None,b3=None):
-    with open('fnet_'+name+".f90","w") as f:
+def writeF90(f90path,name,slope,bias,w1=None,b1=None,w2=None,b2=None,w3=None,b3=None):
+    with open(os.path.join(f90path,'fnet_'+name+".f90"),"w") as f:
         f.write('module fnet_'+name+'\n')
         print(type(slope))
         if type(slope)==list or type(slope)==np.ndarray:
