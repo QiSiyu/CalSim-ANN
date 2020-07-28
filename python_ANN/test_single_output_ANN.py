@@ -9,10 +9,11 @@ input_var = ['SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC']
 
 """ 2. Select stations to be predicted """
 """ choose one or more of 'Emmaton','Jersey Point','Collinsville','Rock Slough' """
-output_stations=['Jersey Point']
+output_stations=['Rock Slough']
 
 """ 3. Specify folder storing trained models """
-model_dir = '/Users/siyuqi/Documents/PhD/3_DSM2/Deliverables'
+# Note: this path should include the model name
+model_dir = '/Users/siyuqi/Downloads/ORRSL'
 
 """ 4. Specify full directory of dataset, including name """
 data_dir = '/Users/siyuqi/Documents/PhD/3_DSM2/Data_Code/ANN_data.xlsx'
@@ -24,7 +25,8 @@ results_dir = 'predict_results'
 
 
 from ann_helper import read_data,normalize_in,writeF90
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import os
 import numpy as np
 import pandas as pd
@@ -96,7 +98,7 @@ for loc in output_stations:
     print('Testing ANN for %s...' %(output_stations[0]))
     with sess.as_default():
         with sess.graph.as_default():
-            saver.restore(sess, os.path.join(model_dir,ann_name,"model.ckpt"))
+            saver.restore(sess, os.path.join(model_dir,"model.ckpt"))
             print("Model restored, testing...")
             
             y_predicted = sess.run(pred,feed_dict)
@@ -123,8 +125,8 @@ for loc in output_stations:
                              float_format='%5.4f',
                              header=True,
                              index=True)
-            writeF90('fnet_'+abbrev_map[output_stations[0].lower()]+".f90",
-                      y_slope[test_index],y_bias[test_index],
-                      sess.run(W1).transpose(),sess.run(b1),
-                      sess.run(W2).transpose(),sess.run(b2),
-                      sess.run(W3).transpose(),sess.run(b3))
+            # writeF90('.',abbrev_map[output_stations[0].lower()],
+            #           y_slope[test_index],y_bias[test_index],
+            #           sess.run(W1).transpose(),sess.run(b1),
+            #           sess.run(W2).transpose(),sess.run(b2),
+            #           sess.run(W3).transpose(),sess.run(b3))

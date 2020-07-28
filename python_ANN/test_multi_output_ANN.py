@@ -7,11 +7,12 @@
 """ 1. Select parameters to be used """
 input_var = ['SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC']
 
-""" 2. Select stations to be predicted """
+""" 2. List all the stations used by the MTL ANN """
 output_stations=['Emmaton','Jersey Point','Collinsville','Rock Slough']
 
 """ 3. Specify folder storing trained models """
-model_dir = '/Users/siyuqi/Documents/PhD/3_DSM2/Deliverables'
+# Note: this path should include the model name
+model_dir = '/Users/siyuqi/Downloads/EMM_JP_CO_ORRSL'
 
 """ 4. Specify full directory of dataset, including name """
 data_dir = '/Users/siyuqi/Documents/PhD/3_DSM2/Data_Code/ANN_data.xlsx'
@@ -23,7 +24,8 @@ results_dir = 'predict_results'
 
 
 from ann_helper import read_data,normalize_in,writeF90
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import os
 import numpy as np
 import pandas as pd
@@ -92,7 +94,7 @@ sess = tf.Session()
 print('Testing ANN for %s...' %(output_stations[0]))
 with sess.as_default():
     with sess.graph.as_default():
-        saver.restore(sess, os.path.join(model_dir,ann_name,"model.ckpt"))
+        saver.restore(sess, os.path.join(model_dir,"model.ckpt"))
         print("Model restored, testing...")
         
         y_predicted = sess.run(pred,feed_dict)
@@ -122,7 +124,7 @@ with sess.as_default():
                          header=True,
                          index=True)
 
-        writeF90('fnet_'+ann_name+".f90",y_slope[train_loc],y_bias[train_loc],
-                  sess.run(W1).transpose(),sess.run(b1),
-                  sess.run(W2).transpose(),sess.run(b2),
-                  sess.run(W3).transpose(),sess.run(b3))
+        # writeF90('.',ann_name,y_slope[train_loc],y_bias[train_loc],
+        #           sess.run(W1).transpose(),sess.run(b1),
+        #           sess.run(W2).transpose(),sess.run(b2),
+        #           sess.run(W3).transpose(),sess.run(b3))
