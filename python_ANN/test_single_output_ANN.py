@@ -8,7 +8,9 @@
 input_var = ['SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC']
 
 """ 2. Select stations to be predicted """
-""" choose one or more of 'Emmaton','Jersey Point','Collinsville','Rock Slough' """
+# choose one or more of {'Emmaton', 'Jersey Point', 'Collinsville', 'Rock Slough', 
+# 'Antioch', 'Mallard','LosVaqueros', 'Martinez', 'MiddleRiver', 
+# 'Vict Intake', 'CVP Intake', 'CCFB_OldR'}
 output_stations=['Rock Slough']
 
 """ 3. Specify folder storing trained models """
@@ -16,7 +18,7 @@ output_stations=['Rock Slough']
 model_dir = '/Users/siyuqi/Downloads/ORRSL'
 
 """ 4. Specify full directory of dataset, including name """
-data_dir = '/Users/siyuqi/Documents/PhD/3_DSM2/Data_Code/ANN_data.xlsx'
+data_dir = '/Users/siyuqi/Documents/PhD/3_DSM2/Data_Code/ANN_data2.xlsx'
 
 """ 5. Specify the folder to store computed results """
 results_dir = 'predict_results'
@@ -34,8 +36,10 @@ import pandas as pd
 on_server = False
 output_shape = 1
 
-nn_shape = [17*len(input_var),8*output_shape,2*output_shape,output_shape]
-locs = {'Emmaton':0,'Jersey Point':1,'Collinsville':2,'Rock Slough':3}
+nn_shape = [None,8*output_shape,2*output_shape,output_shape]
+locs = {'Emmaton':0,'Jersey Point':1,'Collinsville':2,'Rock Slough':3,'Antioch':4,
+        'Mallard':5, 'LosVaqueros':6, 'Martinez':7, 'MiddleRiver':8, 'Vict Intake':9,
+        'CVP Intake':10, 'CCFB_OldR':11}
 abbrev_map = {'rock slough':'ORRSL','rockslough':'ORRSL',
             'emmaton':'EMM','jersey point':'JP','jerseypoint':'JP',
             'antioch':'antioch','collinsville':'CO',
@@ -56,6 +60,7 @@ x_data,y_data = read_data(data_dir,input_var,output_stations)
 [x_norm,x_slope,x_bias] = normalize_in(x_data)
 [y_norm,y_slope,y_bias] = normalize_in(y_data)
 
+nn_shape[0] = x_data.shape[1]
 date = np.arange('1940-10',
                  np.datetime64('1940-10') + np.timedelta64(len(x_norm), 'D'),
                  dtype='datetime64[D]')
@@ -68,7 +73,7 @@ for loc in output_stations:
     ann_name = abbrev_map[loc.lower()]
     tf.reset_default_graph()
     tf.set_random_seed(1)
-    x = tf.placeholder(tf.float32, [None, 17*len(input_var)], name='InputData')
+    x = tf.placeholder(tf.float32, [None, nn_shape[0]], name='InputData')
     y = tf.placeholder(tf.float32, [None, output_shape], name='LabelData')
     
     # Create some variables.
