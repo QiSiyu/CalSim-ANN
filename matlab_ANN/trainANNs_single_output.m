@@ -18,7 +18,7 @@ global lowScale
 global memoryReduction
 global percentCal
 global percentVal
-global predict_stations % siyu 7/3/2019
+global output_stations % siyu 7/3/2019
 global SSE_desired % siyu 7/22/2019
 global trainFunction 
 
@@ -26,25 +26,23 @@ global trainFunction
 % ********************* User Settings **********************
 % **********************************************************
 
-% 1. Define locations to be predicted:
-% available:'Emmaton','Jersey Point','Collinsville', 'Rock Slough',
+% 1. Select one or more output stations from:
+% 'Emmaton','Jersey Point','Collinsville', 'Rock Slough',
 % 'Antioch', 'Mallard', 'LosVaqueros', 'Martinez', 'MiddleRiver', 'Vict
 % Intake', 'CVP Intake', 'CCFB_OldR'
-predict_stations = {'Emmaton','Jersey Point',...
-                      'Collinsville', 'Rock Slough'};%,...
+output_stations = {'Emmaton'};% ,'Jersey Point',...
+%                       'Collinsville', 'Rock Slough'};%,...
 %                        'Antioch','Mallard','LosVaqueros',...
 %                        'Martinez','MiddleRiver','Vict Intake',...
 %                        'CVP Intake','CCFB_OldR'};
                    
-available_inputs = {'SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC'}; % do not change
-% 2. Define variables to be used for prediction:
+% 2. Select one or more input variables from:
+% 'SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC'
 input_var = {'SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC'};
 
 % 3. Define directory to the input and output excel file:
 % note: no blank space is allowed in DATA_DIR or FILE_NAME
-% DATA_DIR = '/Users/siyuqi/Downloads';
-DATA_DIR = '/Users/siyuqi/Documents/PhD/3_DSM2/Data_Code';
-% DATA_DIR = 'D:/ANN/MATLAB/Data';
+DATA_DIR = '/Users/siyuqi/Downloads/CalSim-ANN-master';
 FILE_NAME = 'ANN_data.xlsx';
 
 % 4. Define name of folder you want to save your ANN
@@ -67,7 +65,7 @@ fout=fopen('trainingSetup.out','w');
 test_mode = false; % do not change
 addpath('utils')
 
-predict_stations=sort(predict_stations);
+output_stations=sort(output_stations);
 
 % ************** training setting *************************
 display_messages = 1;
@@ -101,13 +99,13 @@ fprintf(fout,'percentVal:%5.2f\n',percentVal);
 %% load data
 rng(rand_seed);
 
-[input_ori, output_ori,predict_stations,input_text] = load_data(input_var,test_mode,fullfile(DATA_DIR,FILE_NAME),predict_stations);
+[input_ori, output_ori,output_stations,input_text] = load_data(input_var,test_mode,fullfile(DATA_DIR,FILE_NAME),output_stations);
 
-channels=length(predict_stations);
+channels=length(output_stations);
 
 % scale inputs and outputs
 input0 = createModelInputs(input_ori,input_text,input_var,lowScale,highScale);
-[outputs_info,outputs] = createModelOutputStructure(output_ori,prefs,predict_stations,display_messages);
+[outputs_info,outputs] = createModelOutputStructure(output_ori,prefs,output_stations,display_messages);
 
 width = size(input_ori,2);
 
@@ -192,9 +190,9 @@ for loc_id = 1:channels
     VV.Pi = zeros(width,0);
     VV.Ai = zeros(width,0);
     try
-        loc=abbrev_dict(lower(predict_stations{loc_id}));
+        loc=abbrev_dict(lower(output_stations{loc_id}));
     catch
-        temp=predict_stations{loc_id};
+        temp=output_stations{loc_id};
         if length(temp)>=5
             loc=replace(temp(1:5),' ','');
         else

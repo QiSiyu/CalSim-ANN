@@ -17,8 +17,8 @@ output_stations=['Rock Slough']
 # Note: this path should include the model name
 model_dir = '/Users/siyuqi/Downloads/ORRSL'
 
-""" 4. Specify full directory of dataset, including name """
-data_dir = '/Users/siyuqi/Documents/PhD/3_DSM2/Data_Code/ANN_data2.xlsx'
+""" 4. Specify full directory of dataset, including its name """
+data_dir = '/Users/siyuqi/Documents/PhD/3_DSM2/Data_Code/ANN_data.xlsx'
 
 """ 5. Specify the folder to store computed results """
 results_dir = 'predict_results'
@@ -70,6 +70,7 @@ if not os.path.exists(results_dir):
     
 for loc in output_stations:
     test_index = np.arange(output_stations.index(loc),output_stations.index(loc)+1)
+    assert loc.lower() in abbrev_map.keys(), '%s is not a valid output station.'
     ann_name = abbrev_map[loc.lower()]
     tf.reset_default_graph()
     tf.set_random_seed(1)
@@ -103,7 +104,7 @@ for loc in output_stations:
     print('Testing ANN for %s...' %(output_stations[0]))
     with sess.as_default():
         with sess.graph.as_default():
-            saver.restore(sess, os.path.join(model_dir,"model.ckpt"))
+            saver.restore(sess, os.path.join(model_dir,ann_name,"model.ckpt"))
             print("Model restored, testing...")
             
             y_predicted = sess.run(pred,feed_dict)
@@ -130,6 +131,13 @@ for loc in output_stations:
                              float_format='%5.4f',
                              header=True,
                              index=True)
+            print('-'*65)
+            print('-'*65)
+            print("True salinity values written to: \n%s" %(os.path.abspath(os.path.join(results_dir,'%s_ANN_results.txt'%ann_name))))
+            print('-'*65)
+            print("ANN estimated values written to: \n %s" %(os.path.abspath(os.path.join(results_dir,'%s_real_data.txt'%ann_name))))
+            print('-'*65)
+            print('-'*65)
             # writeF90('.',abbrev_map[output_stations[0].lower()],
             #           y_slope[test_index],y_bias[test_index],
             #           sess.run(W1).transpose(),sess.run(b1),

@@ -16,7 +16,7 @@ global lowScale
 global memoryReduction
 global percentCal
 global percentVal
-global predict_stations % siyu 7/3/2019
+global output_stations % siyu 7/3/2019
 global SSE_desired % siyu 7/22/2019
 global trainFunction 
 % global useDefaultSigma % siyu 7/3/2019
@@ -28,24 +28,22 @@ test_mode = false; % do not change
 % **********************************************************
 
 
-% 1. Define locations to be predicted:
-% available:'Emmaton','Jersey Point','Collinsville', 'Rock Slough',
+% 1. Select one or more output stations from:
+% 'Emmaton','Jersey Point','Collinsville', 'Rock Slough',
 % 'Antioch', 'Mallard', 'LosVaqueros', 'Martinez', 'MiddleRiver', 'Vict
 % Intake', 'CVP Intake', 'CCFB_OldR'
-predict_stations = {'Emmaton','Jersey Point',...
-                      'Collinsville', 'Rock Slough',...
-                       'Antioch','Mallard','LosVaqueros',...
-                       'Martinez','MiddleRiver','Vict Intake',...
-                       'CVP Intake','CCFB_OldR'};
+output_stations = {'Emmaton','Jersey Point'};%,...
+%                       'Collinsville', 'Rock Slough',...
+%                        'Antioch','Mallard','LosVaqueros',...
+%                        'Martinez','MiddleRiver','Vict Intake',...
+%                        'CVP Intake','CCFB_OldR'};
                   
-available_inputs = {'SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC'}; % do not change
-% 2. Define variables to be used for prediction:
+% 2. Select one or more input variables from:
+% 'SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC'
 input_var = {'SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC'};
 
 % 3. Define directory to the input and output excel file:
-% DATA_DIR = '/Users/siyuqi/Downloads';
-DATA_DIR = '/Users/siyuqi/Documents/PhD/3_DSM2/Data_Code';
-% DATA_DIR = 'D:/ANN/MATLAB/Data';
+DATA_DIR = '/Users/siyuqi/Downloads/CalSim-ANN-master';
 FILE_NAME = 'ANN_data.xlsx';
 
 % 4. Define name of folder you want to save your ANN
@@ -54,7 +52,7 @@ ANNsetting ='multi_output_ANN-0.1-0.9-8-2-1-80%-MEM-7-10-11'; % folder to put re
 % 5. (optional) Modify num of neurons and activation func in hidden layers
 % Notes: current setting is [8 * num of stations, 2 * num of stations],
 % this code only works for ANNs with 2 hidden layers
-layers = {[8 2]*length(predict_stations)};
+layers = {[8 2]*length(output_stations)};
 layerTypes = {{'logsig','logsig','purelin'}};
 
 % **********************************************************
@@ -68,7 +66,7 @@ fout=fopen('trainingSetup.out','w');
 
 addpath('utils')
 
-predict_stations=sort(predict_stations);
+output_stations=sort(output_stations);
 
 %************** training setting *************************
 display_messages = 1;
@@ -89,7 +87,7 @@ PerformanceFunc = 'msereg';
 
 prefs = createModelPreferences(lowScale,highScale,blockMemory,percentCal,percentVal); % Siyu: deleted unnecessary preferences
 
-fprintf(fout,'layers:%d %d %d\n',layers{1}(1),layers{1}(2),length(predict_stations));
+fprintf(fout,'layers:%d %d %d\n',layers{1}(1),layers{1}(2),length(output_stations));
 fprintf(fout,'layerTypes:%s %s %s\n',char(layerTypes{1}{1}),char(layerTypes{1}{2}),char(layerTypes{1}{3}));
 fprintf(fout,'trainFunction:%s\n',trainFunction);
 fprintf(fout,'lowScale:%5.2f\n',lowScale);
@@ -102,12 +100,12 @@ fprintf(fout,'percentVal:%5.2f\n',percentVal);
 %% load data
 rng(rand_seed);
 
-[input_ori, output_ori,predict_stations,input_text] = load_data(input_var,test_mode,fullfile(DATA_DIR,FILE_NAME),predict_stations);
+[input_ori, output_ori,output_stations,input_text] = load_data(input_var,test_mode,fullfile(DATA_DIR,FILE_NAME),output_stations);
 
 
 % scale inputs and outputs
 input0 = createModelInputs(input_ori,input_text,available_inputs,lowScale,highScale);
-[outputs_info,outputs] = createModelOutputStructure(output_ori,prefs,predict_stations,display_messages, false);
+[outputs_info,outputs] = createModelOutputStructure(output_ori,prefs,output_stations,display_messages, false);
 
 
 width = size(input_ori,2);
@@ -185,20 +183,20 @@ value_set = {'ORRSL','ORRSL','ORRSL',...
             'X2'};
 abbrev_dict = containers.Map(key_set,value_set);
 
-for i =1:length(predict_stations)
+for i =1:length(output_stations)
     try
-        predict_stations{i}=abbrev_dict(lower(predict_stations{i}));
+        output_stations{i}=abbrev_dict(lower(output_stations{i}));
     catch
-        temp=predict_stations{i};
+        temp=output_stations{i};
         if length(temp)>=5
-            predict_stations{i}=replace(temp(1:5),' ','');
+            output_stations{i}=replace(temp(1:5),' ','');
         else
-            predict_stations{i}=temp;
+            output_stations{i}=temp;
         end
     end
 end
 
-loc = strrep(strrep(strjoin(predict_stations,'_'),' ','_'),'__','_');
+loc = strrep(strrep(strjoin(output_stations,'_'),' ','_'),'__','_');
 
 trainANN(loc,inputs,outset{1},VV);
 

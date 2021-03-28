@@ -18,7 +18,7 @@ output_stations=['Emmaton','Jersey Point','Collinsville','Rock Slough']
 model_dir = '/Users/siyuqi/Downloads/EMM_JP_CO_ORRSL'
 
 """ 4. Specify full directory of dataset, including name """
-data_dir = '/Users/siyuqi/Documents/PhD/3_DSM2/Data_Code/ANN_data2.xlsx'
+data_dir = '/Users/siyuqi/Documents/PhD/3_DSM2/Data_Code/ANN_data.xlsx'
 
 """ 5. Specify the folder to store computed results """
 results_dir = 'predict_results'
@@ -97,7 +97,7 @@ feed_dict = {x: x_norm,y: y_norm}
 saver = tf.train.Saver({'W1':W1,'b1':b1,'W2':W2,'b2':b2,'W3':W3,'b3':b3})
 
 sess = tf.Session()
-print('Testing ANN for %s...' %(output_stations[0]))
+print('Testing ANN for %s...' %(ann_name))
 with sess.as_default():
     with sess.graph.as_default():
         saver.restore(sess, os.path.join(model_dir,"model.ckpt"))
@@ -129,7 +129,13 @@ with sess.as_default():
                          float_format='%5.4f',
                          header=True,
                          index=True)
-
+        print('-'*65)
+        print('-'*65)
+        print("True salinity values written to: \n%s" %(os.path.abspath(os.path.join(results_dir,'%s_ANN_results.txt'%ann_name))))
+        print('-'*65)
+        print("ANN estimated values written to: \n %s" %(os.path.abspath(os.path.join(results_dir,'%s_real_data.txt'%ann_name))))
+        print('-'*65)
+        print('-'*65)
         # writeF90('.',ann_name,y_slope[train_loc],y_bias[train_loc],
         #           sess.run(W1).transpose(),sess.run(b1),
         #           sess.run(W2).transpose(),sess.run(b2),

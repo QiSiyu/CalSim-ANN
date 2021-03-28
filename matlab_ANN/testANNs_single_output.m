@@ -9,7 +9,7 @@
 
 %% global declaration
 global DATA_DIR
-global predict_stations
+global output_stations
 global ANNsetting
 
 %% options for users
@@ -17,24 +17,23 @@ global ANNsetting
 % ********************* User Settings **********************
 % **********************************************************
 
-% 1. Define locations to be predicted:
-% available:'Emmaton','Jersey Point','Collinsville', 'Rock Slough',
+% 1. Select one or more output stations from:
+% 'Emmaton','Jersey Point','Collinsville', 'Rock Slough',
 % 'Antioch', 'Mallard', 'LosVaqueros', 'Martinez', 'MiddleRiver', 'Vict
 % Intake', 'CVP Intake', 'CCFB_OldR'
-predict_stations = {'Emmaton'};%,'Jersey Point',...
+output_stations = {'Emmaton'};%,'Jersey Point',...
 %                        'Collinsville', 'Rock Slough',...
 %                        'Antioch','Mallard','LosVaqueros',...
 %                        'Martinez','MiddleRiver','Vict Intake',...
 %                        'CVP Intake','CCFB_OldR'};
                    
-available_inputs = {'SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC'}; % do not change
-% 2. Define variables to be used for prediction:
+% 2. Select one or more input variables from:
+% 'SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC'
 input_var = {'SAC','Exp','SJR','DICU','Vern','SF_Tide','DXC'};
 
 % 3. Define directory to the input and output excel file
 % Note: no blank space is allowed in DATA_DIR or FILE_NAME
-DATA_DIR = '/Users/siyuqi/Documents/GitHub/CalSim-ANN/';
-% DATA_DIR = 'D:/ANN/MATLAB/Data';
+DATA_DIR = '/Users/siyuqi/Downloads/CalSim-ANN-master';
 FILE_NAME = 'ANN_data.xlsx';
 
 % 4. Define ANNsetting (the folder where the model is saved). Must be same
@@ -66,10 +65,10 @@ highScale = 0.9;
 test_mode = false;
 addpath('utils')
 
-predict_stations=sort(predict_stations);
+output_stations=sort(output_stations);
 
 %% load network and predict
-[input_ori, output_ori,predict_stations] = load_data(input_var,test_mode,fullfile(DATA_DIR,FILE_NAME),predict_stations);
+[input_ori, output_ori,output_stations] = load_data(input_var,test_mode,fullfile(DATA_DIR,FILE_NAME),output_stations);
 
 key_set = {'rock slough','rockslough','old river @ rock slough',...
             'emmaton',...
@@ -102,15 +101,15 @@ value_set = {'ORRSL','ORRSL','ORRSL',...
 abbrev_dict = containers.Map(key_set,value_set);
 
 
-for i = 1:length(predict_stations)
+for i = 1:length(output_stations)
     try
-        predict_stations{i}=abbrev_dict(lower(predict_stations{i}));
+        output_stations{i}=abbrev_dict(lower(output_stations{i}));
     catch
-        temp=predict_stations{i};
+        temp=output_stations{i};
         if length(temp)>=5
-            predict_stations{i}=replace(temp(1:5),' ','');
+            output_stations{i}=replace(temp(1:5),' ','');
         else
-            predict_stations{i}=temp;
+            output_stations{i}=temp;
         end
     end
 end
@@ -118,7 +117,7 @@ end
 input_scaled = createScaledData(input_ori,lowScale,highScale);
 [output_scaled,output_slope,output_bias] = createScaledData(output_ori,lowScale,highScale);
 
-[output_ANN_predictions,nets] = predict(predict_stations,input_scaled);
+[output_ANN_predictions,nets] = predict(output_stations,input_scaled);
 
 if ~normalize_ec
     output_ANN_predictions = ...
@@ -132,12 +131,12 @@ if ~exist(fullfile('./network',  ANNsetting,'test_results'), 'dir')
    mkdir(fullfile('./network',  ANNsetting,'test_results'));
 end
 
-test_location = strrep(strrep(strjoin(predict_stations,'_'),' ','_'),'__','_');
+test_location = strrep(strrep(strjoin(output_stations,'_'),' ','_'),'__','_');
 
-write2txt(output_ANN_predictions,predict_stations,save_precision,...
+write2txt(output_ANN_predictions,output_stations,save_precision,...
     fullfile('./network/',  ANNsetting,'test_results',...
     ['single_out_',test_location,'_ANN_predictions.txt']));
-write2txt(output_scaled,predict_stations,save_precision,...
+write2txt(output_scaled,output_stations,save_precision,...
     fullfile('./network/',  ANNsetting,'test_results',...
     ['single_out_',test_location,'_target_outputs.txt']));
 
@@ -185,13 +184,13 @@ function values = denormalize_output(values,slope,bias)
 values = (values - bias) ./ slope;
 end
 
-function write2txt(values,predict_stations,save_precision,write_directory)
-if size(values,1)==length(predict_stations)
+function write2txt(values,output_stations,save_precision,write_directory)
+if size(values,1)==length(output_stations)
     values = values';
 end
 
 rowNames = strsplit(num2str(1:size(values,1)));
-loc = strrep(pad(predict_stations,save_precision+2,'_'),' ','_');
+loc = strrep(pad(output_stations,save_precision+2,'_'),' ','_');
 eval(['values = sprintfc(''%.',num2str(save_precision),'f'',values);']);
 % values = strsplit(num2str(values));
 T = array2table(values,...
