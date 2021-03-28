@@ -9,10 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
 import pandas as pd
-import time
 import os
 def read_data(xl_path,input_var,output_stations):
-    start = time.time()
     xls = pd.ExcelFile(xl_path)
     WS_in = pd.read_excel(xls,0,header=None)
     # drop first column if it's date
@@ -77,15 +75,12 @@ def read_data(xl_path,input_var,output_stations):
         y_data=np.delete(y_data,
                           np.arange(len(x_data),len(y_data)),
                           0)
-    end = time.time()
-    print("loading data in %.2f seconds" % (end-start) )
 
     return [x_data,y_data]
     
 def writeF90(f90path,name,slope,bias,w1=None,b1=None,w2=None,b2=None,w3=None,b3=None):
     with open(os.path.join(f90path,'fnet_'+name+".f90"),"w") as f:
         f.write('module fnet_'+name+'\n')
-        print(type(slope))
         if type(slope)==list or type(slope)==np.ndarray:
             f.write('\n! a = ')
             np.savetxt(f,slope.reshape(1,-1),fmt='%.8f', delimiter=', ',newline='')
@@ -226,6 +221,7 @@ def initnw(in_out_num_list,x_in):
         x_in = np.matmul(x_in,ww.T) + bb
     return list(zip(all_w,all_b))
 
+
 def Filter(string, substr): 
     return [ii for ii in range(len(string))
         if not any(sub.lower() in string[ii].lower() for sub in substr)]        
@@ -257,23 +253,181 @@ def show_eval(y_train_predicted,y_train0,y_test_predicted,y_test0,y_slope,y_bias
         fig.savefig('%s.jpg'%(name), format='jpg', dpi=100)
         
    
-def read_csv(input_data_path,output_data_path):
-    inputs = pd.read_csv(input_data_path,header=0,index_col=0)
-    outputs = pd.read_csv(output_data_path,header=0,index_col=0)
-        
+def read_csv(input_data_path,output_data_path,input_var_list,output_var_list):
+    inputs = pd.read_csv(input_data_path,header=0,index_col=0,comment='#')
+    # select input parameters
+    drop_idx = list(inputs.columns.values)
+    drop_idx = Filter(drop_idx,input_var_list)
+    inputs.drop(columns=drop_idx,inplace=True)
+    # sort input data by input_var_list
+    inputs.reindex(columns=input_var_list)
+    inputs=inputs.fillna(0)
+    
+    outputs = pd.read_csv(output_data_path,header=0,index_col=0,comment='#')
+    # select output station
+    drop_idx = list(outputs.columns.values)
+    drop_idx = Filter(drop_idx,output_var_list)
+    outputs.drop(columns=drop_idx,inplace=True)
+    # sort outputs data by output_var_list
+    outputs.reindex(columns=output_var_list)
+            
     return [np.array(inputs).astype('float32'),
             np.array(outputs).astype('float32')]
 
+def read_csv_mix(input_daily_path,daily_var_list,input_monthly_path,monthly_var_list,
+                 output_data_path, output_var_list):
+    ### input_daily_path: the new dataset
+    ### input_monthly_path: the old dataset
+    inputs_d = pd.read_csv(input_daily_path,header=0,index_col=0,comment='#')
+    inputs_d.index = pd.to_datetime(inputs_d.index)
+    # select input parameters
+    drop_idx = list(inputs_d.columns.values)
+    drop_idx = Filter(drop_idx,daily_var_list)
+    inputs_d.drop(columns=drop_idx,inplace=True)
+    # sort input data by input_var_list
+    inputs_d.reindex(columns=daily_var_list)
+    inputs_d=inputs_d.fillna(0)
+    
+    # read old dataset and retrieve first day of the month for each date
+    inputs_m = pd.read_csv(input_monthly_path,header=0,index_col=0,comment='#')
+    inputs_m.index = pd.to_datetime(inputs_m.index)
+    # select input parameters
+    drop_idx = list(inputs_m.columns.values)
+    drop_idx = Filter(drop_idx,monthly_var_list)
+    inputs_m.drop(columns=drop_idx,inplace=True)
+    # sort input data by monthly_var_list
+    inputs_m.reindex(columns=monthly_var_list)
+    inputs_m=inputs_m.fillna(0)
+    
+    inputs_m.reset_index(inplace=True)
+    inputs_m['month'] = inputs_m['index'].apply(lambda x : x.replace(day=1))
 
-def process_data(input_dataset,output_dataset, history_size):
-    assert len(input_dataset)==len(output_dataset)
+    ## add a column representing month index to inputs_d
+    inputs_d['month']= inputs_d.index.to_series().apply(lambda x : (x.to_period('m')- inputs_m['index'][0].to_period('m')).n)
+    
+    ## delete duplicate rows in inputs_m
+    inputs_m.set_index('month', drop=True, inplace=True)
+    inputs_m.drop(columns='index',inplace=True)
+    inputs_m = inputs_m[~inputs_m.index.duplicated(keep='first')]
+
+    # inputs_m['index'].apply(lambda x : x+pd.DateOffset(months=2))
+
+    outputs = pd.read_csv(output_data_path,header=0,index_col=0,comment='#')
+    # select output station
+    drop_idx = list(outputs.columns.values)
+    drop_idx = Filter(drop_idx,output_var_list)
+    outputs.drop(columns=drop_idx,inplace=True)
+    # sort outputs data by output_var_list
+    outputs.reindex(columns=output_var_list)
+            
+    return [np.array(inputs_d).astype('float32'),
+            np.array(inputs_m).astype('float32'),
+            np.array(outputs).astype('float32')]
+
+
+def process_data(input_dataset,output_dataset,
+                 single_days=7, window_num=10,
+                 window_size = 11,predict=0,
+                 use_input = True,add_ec=False):
+    assert len(input_dataset)==len(output_dataset), "input and output data must have same length"
     data = []
     labels = []
-  
-    for i in range(history_size,len(input_dataset)):
-      # Reshape data from (history_size,# of variables) to
-      # (history_size * # of variables, 1)
-      data.append(np.reshape(input_dataset[i-history_size:i], (-1, 1)))
-      labels.append(output_dataset[i])
-    return np.array(data), np.array(labels)
+    total_avg_num = window_num*window_size
+    end_date = len(input_dataset)-predict
+    if window_num != 0 and window_size != 0:
+        for i in range(single_days+total_avg_num+int(add_ec)-1, end_date):
+            # Reshape data from (history_size,# of variables) to
+            # new_shape
+            if use_input:
+                input_data = np.concatenate((np.reshape(input_dataset[i:i-single_days:-1], (single_days,-1)),
+                                                np.mean(np.reshape(input_dataset[i-single_days:(None if i-single_days-total_avg_num==-1 else i-single_days-total_avg_num):-1], (window_num,window_size,-1)),axis=1)),axis=0)
+            if add_ec:
+                ec_data = np.concatenate([np.reshape(output_dataset[i-1:i-single_days-1:-1], (single_days,-1)),
+                                          np.mean(np.reshape(output_dataset[i-single_days-1:(None if i-single_days-total_avg_num-1==-1 else i-single_days-total_avg_num-1):-1], (window_num,window_size,-1)),axis=1)],axis=0)
+            
+            if add_ec and use_input:
+                data.append(np.concatenate([input_data,ec_data],axis=1))
+            elif add_ec:
+                data.append(ec_data)
+            elif use_input:
+                data.append(input_data)
+            else:
+                print("No input data selected")
+                return
+            labels.append(output_dataset[i+predict])
+    else:
+        for i in range(single_days+total_avg_num+int(add_ec)-1, end_date):
+            # Reshape data from (history_size,# of variables) to
+            # new_shape
+            if use_input:
+                input_data = np.reshape(input_dataset[i:(None if i-single_days==-1 else i-single_days):-1], (single_days,-1))
+            if add_ec:
+                ec_data = np.reshape(output_dataset[i-1:(None if i-single_days-1==-1 else i-single_days-1):-1], (single_days,-1))
+                
+            if add_ec and use_input:
+                data.append(np.concatenate([input_data,ec_data],axis=1))
+            elif add_ec:
+                data.append(ec_data)
+            elif use_input:
+                data.append(input_data)
+            else:
+                print("No input data selected")
+                return
+            labels.append(output_dataset[i+predict])
+            
+    return np.array(data).transpose(0,2,1), np.array(labels)
 
+def process_data_vary_pred(input_dataset,output_dataset,
+                           single_days=7, window_num=10,
+                           window_size = 11,predict_list=None):
+    assert len(input_dataset)==len(output_dataset), "input and output data must have same length"
+    assert len(predict_list)==output_dataset.shape[1]
+    assert min(predict_list) >= 0
+    data = []
+    labels = []
+    total_avg_num = window_num*window_size
+    end_date = len(input_dataset)-max(predict_list)
+    if window_num != 0 and window_size != 0:
+        for i in range(single_days+total_avg_num-1, end_date):
+            # Reshape data from (history_size,# of variables) to
+            # new_shape
+            data.append(np.concatenate((np.reshape(input_dataset[i:i-single_days:-1], (single_days,-1)),
+                                        np.mean(np.reshape(input_dataset[i-single_days:i-single_days-total_avg_num:-1], (window_num,window_size,-1)),axis=1)),axis=0))
+            labels.append(np.asarray([output_dataset[i+predict,ii] for ii,predict in enumerate(predict_list)]))
+    else:
+        for i in range(single_days+total_avg_num-1, end_date):
+            # Reshape data from (history_size,# of variables) to
+            # new_shape
+            if i-single_days==-1:
+                data.append(np.reshape(input_dataset[i::-1], (single_days,-1)))
+            else:
+                data.append(np.reshape(input_dataset[i:i-single_days:-1], (single_days,-1)))
+            labels.append(np.asarray([output_dataset[i+predict,ii] for ii,predict in enumerate(predict_list)]))
+            
+    return np.array(data).transpose(0,2,1), np.array(labels)
+
+  
+  
+def conv_filter_generator(single_days=7,window_num=10,window_size = 11):
+    w = np.zeros((1,single_days+window_num*window_size,single_days+window_num))
+    for ii in range(single_days):
+        w[0,single_days+window_num*window_size-ii-1,single_days-ii-1] = 1
+    for ii in range(window_num):
+        w[0,((window_num-ii-1)*window_size):((window_num-ii)*window_size),single_days+ii] = 1/window_size
+    return w
+  
+def conv_filter_generator_v2(single_days=7,window_num=10,window_size = 11,var_num=7):
+    w1 = np.repeat(np.identity(var_num)[np.newaxis,...],1, axis=0)
+    w2 = np.repeat(np.identity(var_num)[np.newaxis,...]/window_size,window_size, axis=0)
+    return (w1,w2)
+  
+def add_noise(data, noise_dict):
+    ## add noise to data according to noise_dict
+    ## data must have the shape of (no. of samples, no. of variables)
+    noisy_data = np.copy(data)
+    p_signal = np.mean(data**2,axis=0)
+    for index in noise_dict.keys():
+        p_noise = p_signal[index] / (10**(noise_dict[index]/10))
+        noise = np.random.normal(0, np.sqrt(p_noise), data.shape[0])
+        noisy_data[:,index] = noise+data[:,index]
+    return noisy_data
