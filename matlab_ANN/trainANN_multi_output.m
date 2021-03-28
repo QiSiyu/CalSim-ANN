@@ -104,7 +104,7 @@ rng(rand_seed);
 
 
 % scale inputs and outputs
-input0 = createModelInputs(input_ori,input_text,available_inputs,lowScale,highScale);
+input0 = createModelInputs(input_ori,input_text,input_var,lowScale,highScale);
 [outputs_info,outputs] = createModelOutputStructure(output_ori,prefs,output_stations,display_messages, false);
 
 
