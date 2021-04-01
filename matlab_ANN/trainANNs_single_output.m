@@ -51,8 +51,8 @@ ANNsetting ='single_output_ANN-0.1-0.9-8-2-1-80%-MEM-7-10-11'; % folder to put r
 %  - Fortran file assumes the ANN has TWO hidden layers with 'logsig'
 %    activation functions. It won't work if you add or remove hidden
 %    layers or change the activation functions.
-layers = {[8 2 1]};
-layerTypes = {{'logsig','logsig','logsig','purelin'}};
+layers = {[8 2]};
+layerTypes = {{'logsig','logsig','purelin'}};
 
 % **********************************************************
 % **************** User Settings Finished ******************
@@ -62,7 +62,7 @@ layerTypes = {{'logsig','logsig','logsig','purelin'}};
 % ************** other settings *************************
 
 fout=fopen('trainingSetup.out','w');
-test_mode = true; % do not change
+test_mode = false; % do not change
 addpath('utils')
 
 output_stations=sort(output_stations);
