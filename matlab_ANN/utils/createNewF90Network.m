@@ -12,6 +12,15 @@ if nargin < 4
     prefs = model.prefs;
 end
 
+if length(net.layers) ~= 3
+    fprintf('Fortran file is not generated because ANN has %d hidden layers, not 2.\n',length(net.layers)-1)
+    return
+end
+
+if ~(strcmp(net.layers{1}.transferFcn,'tansig') && strcmp(net.layers{2}.transferFcn,'tansig') && strcmp(net.layers{3}.transferFcn,'purelin'))
+    fprintf(['Fortran file is not generated because network activation functions are ',repmat('%s, ', 1, length(net.layers)),', not logsig, logsig, purelin\n'],string(net.layers.transferFcn))
+    return
+end
 %% scale and format inputs
 if isstruct(inp)
     inp = createModelInputStructure(inp,prefs);

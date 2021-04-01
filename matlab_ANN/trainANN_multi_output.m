@@ -50,8 +50,12 @@ FILE_NAME = 'ANN_data.xlsx';
 ANNsetting ='multi_output_ANN-0.1-0.9-8-2-1-80%-MEM-7-10-11'; % folder to put results in
 
 % 5. (optional) Modify num of neurons and activation func in hidden layers
-% Notes: current setting is [8 * num of stations, 2 * num of stations],
-% this code only works for ANNs with 2 hidden layers
+% Notes: 
+%  - You can add or remove layers by adding or removing elements from BOTH
+%    layers AND layerTypes.
+%  - Fortran file assumes the ANN has TWO hidden layers with 'logsig'
+%    activation functions. If you add or remove hidden layers, no fortran
+%    file will be generated. 
 layers = {[8 2]*length(output_stations)};
 layerTypes = {{'logsig','logsig','purelin'}};
 
@@ -87,15 +91,20 @@ PerformanceFunc = 'msereg';
 
 prefs = createModelPreferences(lowScale,highScale,blockMemory,percentCal,percentVal); % Siyu: deleted unnecessary preferences
 
-fprintf(fout,'layers:%d %d %d\n',layers{1}(1),layers{1}(2),length(output_stations));
-fprintf(fout,'layerTypes:%s %s %s\n',char(layerTypes{1}{1}),char(layerTypes{1}{2}),char(layerTypes{1}{3}));
+fprintf(fout,['layers:',repmat('%d ', 1, length(layers{1})),'%d\n'],layers{1},length(output_stations));
+fprintf(fout,['layerTypes:',repmat('%s ', 1, length(layerTypes{1})-1),'%s\n'],string(layerTypes{1}));
 fprintf(fout,'trainFunction:%s\n',trainFunction);
 fprintf(fout,'lowScale:%5.2f\n',lowScale);
 fprintf(fout,'highScale:%5.2f\n',highScale);
 fprintf(fout,'percentCal:%5.2f\n',percentCal);
 fprintf(fout,'percentVal:%5.2f\n',percentVal);
 
-
+warning_message = sprintf(['Error in User Settings:\nAn activation function must be specified for each layer, including an output layer.\n', ...
+    'Therefore, variable "layerTypes" should have one more element than variable "layers". \nPlease double-check:\n',...
+    'layers: ',repmat('%d ', 1, length(layers{1})),'\n',...
+    'layerTypes: ',repmat('%s ', 1, length(layerTypes{1})-1),'%s\n'],...
+    layers{1},string(layerTypes{1}));
+assert((length(layers{1})+1)==length(layerTypes{1}),warning_message) % siyu 3/31/2021
 
 %% load data
 rng(rand_seed);

@@ -250,7 +250,7 @@ def show_eval(y_train_predicted,y_train0,y_test_predicted,y_test0,y_slope,y_bias
         plt.xlabel('Actual Target')
         plt.ylabel('Predicted')
         fig.text(0.2, 0.7, 'y=%.4fx\n $R^2=$%.4f'%(slope,r_value), fontsize=14)
-        fig.savefig('%s.jpg'%(name), format='jpg', dpi=100)
+        fig.savefig('%s/%s.jpg'%(name,name), format='jpg', dpi=100)
         
    
 def read_csv(input_data_path,output_data_path,input_var_list,output_var_list):

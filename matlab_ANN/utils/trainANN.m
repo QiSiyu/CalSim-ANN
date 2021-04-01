@@ -3,7 +3,8 @@ function outmodel = trainANN(location,inputs,outputs,VV)
 global display_messages
 global ANNsetting
 global percentCal
-
+global layers
+global layerTypes
 
 if nargin ~= 4
     error('Usage must include location ID, inputs, outputs and VV');
@@ -55,7 +56,9 @@ if ~exist(['./network/',  ANNsetting,'/',location], 'dir')
 end
 
 movefile('*.mat',['./network/',  ANNsetting,'/',location],'f')
-movefile('*.f90',['./network/',  ANNsetting,'/',location],'f')
+if length(layers{1})==3 && isequal(layerTypes , {{'logsig','logsig','purelin'}})
+    movefile('*.f90',['./network/',  ANNsetting,'/',location],'f')
+end
 fclose('all');
 dirStatus=size(dir('*.out'));
 if(dirStatus(1)>0)      
