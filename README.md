@@ -1,5 +1,23 @@
 # CalSim-ANN
-Multi-variate Dense Neural Networks designed to predict salinity at Sacramento-San Joaquin Delta. Two architectures are provided in both MATLAB and Python: single-output (STL) ANNs and multi-output (MTL) ANNs. And an enhanced ANN architecture, MTL ANN with a convolutional pre-processing layer, is available in Python.
+## Introduction
+This repository contains the scripts to train and test the models described in the paper "[EnhancedArtificial Neural Networks for Salinity Estimation and Forecasting in the Sacramento-San Joaquin Delta of California](https://ascelibrary.org/doi/full/10.1061/%28ASCE%29WR.1943-5452.0001445?casa_token=05VRObBIFRUAAAAA%3AmmX4MFaWkY6ZTf__OXanBzi4gjmMXunXXgKdLBPzEMEXx7zdXCHdP5Kye4c1CQRHGBIEEivB)".
+
+These multi-variate Dense Neural Networks are designed to predict salinity at Sacramento-San Joaquin Delta. Two architectures are provided in both MATLAB and Python: single-output (STL) ANNs and multi-output (MTL) ANNs. And an enhanced ANN architecture, MTL ANN with a convolutional pre-processing layer, is available in Python.
+
+### Citation
+If you use these models in your research, please cite:
+
+    @article{qi2021enhanced,
+      title={Enhanced Artificial Neural Networks for Salinity Estimation and Forecasting in the Sacramento-San Joaquin Delta of California},
+      author={Qi, Siyu and Bai, Zhaojun and Ding, Zhi and Jayasundara, Nimal and He, Minxue and Sandhu, Prabhjot and Seneviratne, Sanjaya and Kadir, Tariq},
+      journal={Journal of Water Resources Planning and Management},
+      volume={147},
+      number={10},
+      pages={04021069},
+      year={2021},
+      publisher={American Society of Civil Engineers}
+    }
+
 
 ## What's in this repo
 *  Code to train and test ANNs in both MATLAB and Python.
